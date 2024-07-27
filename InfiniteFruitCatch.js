@@ -14,6 +14,21 @@ let startTime;
 const scale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
 let obstacles = []; // 障害物を格納する配列
 
+// 音符の長さに基づくフルーツの出現間隔（ミリ秒）
+const noteDurations = [
+  2000, // 2分音符
+  1000, // 4分音符
+  500,  // 8分音符
+  333,  // 8分三連音符
+  250,  // 16分音符
+  333,  // 8分三連音符
+  500,  // 8分音符
+  1000, // 4分音符
+  2000  // 2分音符
+];
+let currentNoteIndex = 0;
+let lastFruitTime = 0;
+
 function preload() {
   handImage = loadImage('hand.png'); // 手の画像ファイルを用意してください
   catchSound = loadSound('catch.mp3'); // catch.mp3をロード
@@ -40,8 +55,11 @@ function draw() {
   }
 
   if (!gameOver) {
-    if (frameCount % 30 === 0 && fruits.length < maxFruits) {
+    let currentTime = millis();
+    if (currentTime - lastFruitTime > noteDurations[currentNoteIndex]) {
       fruits.push(createFruit());
+      lastFruitTime = currentTime;
+      currentNoteIndex = (currentNoteIndex + 1) % noteDurations.length;
     }
 
     // 障害物を描画
@@ -128,6 +146,8 @@ function startGame() {
   score = 0;
   missedCount = 0;
   startTime = millis(); // ゲーム開始時刻を記録
+  currentNoteIndex = 0;
+  lastFruitTime = millis();
 
   // ランダムに障害物を配置
   obstacles = [];
